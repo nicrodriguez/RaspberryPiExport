@@ -42,13 +42,13 @@ MIN_CONTOUR_AREA = 100
 # Loading in training classifications and training data
 def loadKNNDataAndTrainKNN():
     try:
-        npaClassifications = np.loadtxt("ClassificationFiles/classifications1.txt", np.float32)
+        npaClassifications = np.loadtxt("classifications1.txt", np.float32)
     except:
         print("Error, unable to open classifications.txt, exiting program\n")
         return False
 
     try:
-        npaFlattenedImages = np.loadtxt("ClassificationFiles/flattened_images1.txt", np.float32)
+        npaFlattenedImages = np.loadtxt("flattened_images1.txt", np.float32)
     except:
         print("Error, unable to open flattened_images.txt, exiting program\n")
         os.system("pause")
