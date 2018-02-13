@@ -1,0 +1,8 @@
+numpy
+scipy
+matplotlib
+scikit-learn
+-U scikit-image
+homebrew
+opencv-python
+opencv-contrib-python
