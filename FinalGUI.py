@@ -1,18 +1,8 @@
 # import the necessary packages
 from __future__ import print_function
-import threading
 from tkinter import *
-
-import datetime
-
-import os
-
-import imutils as imutils
 from PIL import Image, ImageTk
 import cv2
-# from imutils.video import VideoStream
-# import argparse
-# import time
 
 
 class FinalGUI:
@@ -29,12 +19,12 @@ class FinalGUI:
         self.videoPanel.grid(row=0, rowspan=5, column=0, columnspan=3, padx=10, pady=10)
 
         self.latLabel = Label(self.root, text="Latitude: 89.43242")
-        self.latLabel.grid(row=5, column=0, columnspan=1)
-        self.latLabel.config(font=("Times New Roman", 40), justify=LEFT)
+        self.latLabel.grid(row=5, column=0, columnspan=1, sticky=N+S+E+W)
+        self.latLabel.config(font=("Times New Roman", 40), justify=LEFT, borderwidth=2, relief="groove")
 
         self.lonLabel = Label(self.root, text="Longitude: 24.43242")
-        self.lonLabel.grid(row=5, column=2, columnspan=1)
-        self.lonLabel.config(font=("Times New Roman", 40), justify=LEFT)
+        self.lonLabel.grid(row=5, column=2, columnspan=1, sticky=N+S+E+W)
+        self.lonLabel.config(font=("Times New Roman", 40), justify=LEFT, borderwidth=2, relief="groove")
 
         self.streetLabel = Label(self.root, text="Street Name: Rosemont St")
         self.streetLabel.grid(row=6, column=0, columnspan=3)
@@ -45,16 +35,16 @@ class FinalGUI:
         self.carSpeedUnitLabel.config(font=("Times New Roman", 40))
 
         self.carSpeedLabel = Label(self.root, text="80")
-        self.carSpeedLabel.grid(row=1, column=3)
-        self.carSpeedLabel.config(font=("Times New Roman", 80), justify=RIGHT)
+        self.carSpeedLabel.grid(row=1, column=3, sticky=N+S+E+W)
+        self.carSpeedLabel.config(font=("Times New Roman", 80), borderwidth=2, relief="groove")
 
-        self.carSpeedLimitUnitLabel = Label(self.root, text="Speed Limit (mph)")
+        self.carSpeedLimitUnitLabel = Label(self.root, text="Speed Limit (mph):")
         self.carSpeedLimitUnitLabel.grid(row=2, column=3)
         self.carSpeedLimitUnitLabel.config(font=("Times New Roman", 40), justify=LEFT)
 
         self.carSpeedLimitLabel = Label(self.root, text="75")
-        self.carSpeedLimitLabel.grid(row=3, column=3)
-        self.carSpeedLimitLabel.config(font=("Times New Roman", 80), justify=RIGHT)
+        self.carSpeedLimitLabel.grid(row=3, column=3, sticky=N+S+E+W)
+        self.carSpeedLimitLabel.config(font=("Times New Roman", 80), justify=RIGHT, borderwidth=2, relief="groove")
 
         self.detectedLimitPane = Label(self.root)
         self.detectedLimitPane.grid(row=4, column=3, padx=10, pady=10)
@@ -80,16 +70,6 @@ class FinalGUI:
         self.detectedLimitPane.img = img
         self.detectedLimitPane.configure(image=img)
 
-
-
-
-# construct the argument parse and parse the arguments
-# ap = argparse.ArgumentParser()
-# ap.add_argument("-o", "--output", required=True,
-#                 help="path to output directory to store snapshots")
-# ap.add_argument("-p", "--picamera", type=int, default=-1,
-#                 help="whether or not the Raspberry Pi camera should be used")
-# args = vars(ap.parse_args())
 
 
 
