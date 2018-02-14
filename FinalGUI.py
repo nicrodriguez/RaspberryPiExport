@@ -44,12 +44,19 @@ class FinalGUI:
         self.carSpeedUnitLabel.grid(row=2, column=2)
         self.carSpeedUnitLabel.config(font=("Times New Roman", 40))
 
+        self.carSpeedLimitLabel = Label(self.root, text="Limit: 75")
+        self.carSpeedLimitLabel.grid(row=3, column=1)
+        self.carSpeedLimitLabel.config(font=("Times New Roman", 80))
+
+        self.carSpeedLimitUnitLabel = Label(self.root, text="mph")
+        self.carSpeedLimitUnitLabel.grid(row=3, column=2)
+        self.carSpeedLimitUnitLabel.config(font=("Times New Roman", 40))
         self.show_frame()
 
     def show_frame(self):
         _, frame = self.vs.read()
         frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-        frame = cv2.resize(frame, (int(self.w*2/3), int(self.h*4/5)))
+        frame = cv2.resize(frame, (int(self.w*7/10), int(self.h*7/10)))
         img = Image.fromarray(frame)
         imgtk = ImageTk.PhotoImage(img)
         self.videoPanel.imgtk = imgtk
