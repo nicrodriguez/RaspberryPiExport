@@ -1,10 +1,11 @@
 from tkinter import *
 from SpeedDetectorGUI import GPSGUI
 from DetectSpeedLimit import *
+from FinalGUI import *
 
 
-# window = Tk()
-# GPSGUI(window, 0)
-# window.mainloop()
+window = Tk()
+GPSGUI(window)
+window.mainloop()
 
-DetectSpeedLimit(0)
+# DetectSpeedLimit(0)

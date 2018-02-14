@@ -6,3 +6,4 @@ scikit-learn
 homebrew
 opencv-python
 opencv-contrib-python
+imutils
