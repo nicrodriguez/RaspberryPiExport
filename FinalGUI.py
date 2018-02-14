@@ -26,7 +26,7 @@ class FinalGUI:
         self.root.bind("<Escape>", lambda e: e.widget.quit())
 
         self.videoPanel = Label(self.root)
-        self.videoPanel.grid(row=0, rowspan=5, column=0)
+        self.videoPanel.grid(row=0, rowspan=5, column=0, padx=10, pady=10)
 
         self.latLabel = Label(self.root, text="Latitude: 89.43242")
         self.latLabel.grid(row=0, column=1, columnspan=2)
@@ -147,7 +147,5 @@ class PhotoBoothApp:
 #                 help="whether or not the Raspberry Pi camera should be used")
 # args = vars(ap.parse_args())
 
-view = Tk()
-FinalGUI(view)
-view.mainloop()
+
 
