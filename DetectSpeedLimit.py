@@ -66,7 +66,7 @@ class DetectSpeedLimit:
             print("\nError: KNN training was not successful\n")
             return
 
-        imgOriginalFrame = cv2.imread("speed_limit_65.jpg")
+        imgOriginalFrame = cv2.imread("speed_limit_80.jpg")
 
         if imgOriginalFrame is None:
             print("\nError: image not read from file\n\n")
