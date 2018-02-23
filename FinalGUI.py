@@ -8,6 +8,7 @@ import cv2
 class FinalGUI:
     def __init__(self, root):
         self.root = root
+        # self.vs1 = cv2.VideoCapture(1)
         self.vs = cv2.VideoCapture(0)
         self.w, self.h = self.root.winfo_screenwidth(), self.root.winfo_screenheight()
         self.root.overrideredirect(1)
