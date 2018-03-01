@@ -7,14 +7,21 @@ import DetectSigns
 
 class DetectSpeedLimit:
 
-    def __init__(self,frame, readFromImg=4):
+    def __init__(self, readFromImg=4):
         self.SCALAR_BLACK = (0.0, 0.0, 0.0)
         self.SCALER_WHITE = (255.0, 255.0, 255.0)
         self.SCALAR_YELLOW = (0.0, 255.0, 255.0)
         self.SCALAR_GREEN = (0.0, 255.0, 0.0)
         self.SCALAR_RED = (0.0, 0.0, 255.0)
+        self.readSpeedLimit = None
         if readFromImg == 0:
             self.readFromStaticImage()
+        else:
+            blnkKNNTrainingSuccessful = DetectChars.loadKNNDataAndTrainKNN()
+
+            if not blnkKNNTrainingSuccessful:
+                print("\nError: KNN training was not successful\n")
+                return
         # if readFromImg == 1:
             # self.readFromFrame(frame)
 
@@ -108,11 +115,7 @@ class DetectSpeedLimit:
         return
 
     def readVideo(self):
-        blnkKNNTrainingSuccessful = DetectChars.loadKNNDataAndTrainKNN()
 
-        if not blnkKNNTrainingSuccessful:
-            print("\nError: KNN training was not successful\n")
-            return
 
         _, video = cv2.VideoCapture(0)
         success, frame = video.read()
@@ -128,6 +131,8 @@ class DetectSpeedLimit:
         return
 
     def readFromFrame(self, sign, frame):
+
+
         listOfPossibleSigns = DetectSigns.detectSignsInScene(sign)
         print(listOfPossibleSigns)
         listOfPossibleSigns = DetectChars.detectCharsInSign(listOfPossibleSigns)
@@ -146,7 +151,8 @@ class DetectSpeedLimit:
                 return frame
 
             self.drawRedRectangleAroundSign(frame, spdSign)
-
+            speedLimit = int(5 * round(float(int(spdSign.strChar))/5))
+            self.readSpeedLimit = str(speedLimit)
             print("\nSpeed Limit Read From Image: {0}\n".format(spdSign.strChar))
             print("------------------------------------")
 

@@ -4,10 +4,12 @@ from tkinter import *
 from PIL import Image, ImageTk
 import cv2
 from DetectSign import *
+from DetectSpeedLimit import *
 
 
 class FinalGUI:
     def __init__(self, root):
+        self.DSL = DetectSpeedLimit(1)
         self.root = root
         # self.vs1 = cv2.VideoCapture(1)
         self.vs = cv2.VideoCapture(0)
@@ -44,7 +46,7 @@ class FinalGUI:
         self.carSpeedLimitUnitLabel.grid(row=2, column=3)
         self.carSpeedLimitUnitLabel.config(font=("Times New Roman", 40), justify=LEFT)
 
-        self.carSpeedLimitLabel = Label(self.root, text="75")
+        self.carSpeedLimitLabel = Label(self.root, text=" --")
         self.carSpeedLimitLabel.grid(row=3, column=3, sticky=N+S+E+W)
         self.carSpeedLimitLabel.config(font=("Times New Roman", 80), justify=RIGHT, borderwidth=2, relief="groove")
 
@@ -59,6 +61,7 @@ class FinalGUI:
     def show_frame(self):
         _, frame = self.vs.read()
         rect = DetectSign(frame)
+
         frame = rect.findRectangle()
         sign = rect.cropFrame
 
@@ -71,6 +74,8 @@ class FinalGUI:
 
         if sign is not None and sign.size > 0:
             sign = cv2.resize(sign, (int(self.w * 2 / 10), int(self.h * 4 / 10)))
+            sign = self.DSL.readFromFrame(sign, sign)
+            self.carSpeedLimitLabel.config(text=self.DSL.readSpeedLimit)
             self.show_detected_limit(sign)
             self.detectedLimitPane.after(10, self.show_detected_limit(sign))
         self.videoPanel.after(10, self.show_frame)
@@ -78,6 +83,7 @@ class FinalGUI:
     def show_detected_limit(self, img):
         # img = cv2.imread("speed_limit_75.png")
         if img is not None:
+
             img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
             img = Image.fromarray(img)
             img = ImageTk.PhotoImage(img)

@@ -10,7 +10,7 @@ class DetectSign:
     def __init__(self, frame):
         self.frame = frame
         self.cropFrame = None
-        self.DSL = DetectSpeedLimit(frame, 1)
+        self.DSL = DetectSpeedLimit(1)
 
         # self.gray = cv2.cvtColor(frame, cv2.COLOR_RGB2GRAY)
 
