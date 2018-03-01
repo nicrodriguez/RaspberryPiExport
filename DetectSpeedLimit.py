@@ -7,7 +7,7 @@ import DetectSigns
 
 class DetectSpeedLimit:
 
-    def __init__(self, readFromImg=4):
+    def __init__(self,frame, readFromImg=4):
         self.SCALAR_BLACK = (0.0, 0.0, 0.0)
         self.SCALER_WHITE = (255.0, 255.0, 255.0)
         self.SCALAR_YELLOW = (0.0, 255.0, 255.0)
@@ -15,6 +15,8 @@ class DetectSpeedLimit:
         self.SCALAR_RED = (0.0, 0.0, 255.0)
         if readFromImg == 0:
             self.readFromStaticImage()
+        # if readFromImg == 1:
+            # self.readFromFrame(frame)
 
     def drawRedRectangleAroundSign(self, originalFrame, sign):
         p2fRectPoints = cv2.boxPoints(sign.rrLocationOfSignInFrame)
@@ -59,6 +61,8 @@ class DetectSpeedLimit:
         cv2.putText(originalFrame, sign.strChar, (ptLowerLeftTextOriginX, ptLowerLeftTextOriginY), intFontFace,
                     fltFontScale, self.SCALAR_YELLOW, intFontThickness)
 
+        return originalFrame
+
     def readFromStaticImage(self):
         blnkKNNTrainingSuccessful = DetectChars.loadKNNDataAndTrainKNN()
 
@@ -66,7 +70,7 @@ class DetectSpeedLimit:
             print("\nError: KNN training was not successful\n")
             return
 
-        imgOriginalFrame = cv2.imread("speed_limit_80.jpg")
+        imgOriginalFrame = cv2.imread("speed_limit_31.jpg")
 
         if imgOriginalFrame is None:
             print("\nError: image not read from file\n\n")
@@ -102,3 +106,49 @@ class DetectSpeedLimit:
 
         cv2.waitKey(0)
         return
+
+    def readVideo(self):
+        blnkKNNTrainingSuccessful = DetectChars.loadKNNDataAndTrainKNN()
+
+        if not blnkKNNTrainingSuccessful:
+            print("\nError: KNN training was not successful\n")
+            return
+
+        _, video = cv2.VideoCapture(0)
+        success, frame = video.read()
+        self.readFromFrame(frame)
+        imgOriginalFrame = cv2.imread("speed_limit_80.jpg")
+
+        if imgOriginalFrame is None:
+            print("\nError: image not read from file\n\n")
+            os.system("pause")
+            return
+        self.readFromFrame(frame)
+        cv2.waitKey(0)
+        return
+
+    def readFromFrame(self, sign, frame):
+        listOfPossibleSigns = DetectSigns.detectSignsInScene(sign)
+        print(listOfPossibleSigns)
+        listOfPossibleSigns = DetectChars.detectCharsInSign(listOfPossibleSigns)
+
+        # cv2.imshow("imgOriginalFrame", frame)
+
+        if listOfPossibleSigns is None or len(listOfPossibleSigns) == 0:
+            print("\nNo speed limit signs were detected\n")
+            return frame
+        else:
+            listOfPossibleSigns.sort(key=lambda possibleSigns: 2, reverse=True)
+            spdSign = listOfPossibleSigns[0]
+
+            if len(spdSign.strChar) == 0:
+                print("\nNo Characters Were Detected\n\n")
+                return frame
+
+            self.drawRedRectangleAroundSign(frame, spdSign)
+
+            print("\nSpeed Limit Read From Image: {0}\n".format(spdSign.strChar))
+            print("------------------------------------")
+
+            return self.writeSpeedLimitCharsOnImage(frame, spdSign)
+

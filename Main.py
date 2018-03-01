@@ -26,7 +26,7 @@ if displayGUI:
     window.mainloop()
 
 else:
-    DetectSpeedLimit(0)
+    DetectSpeedLimit(None, 0)
 
 
 

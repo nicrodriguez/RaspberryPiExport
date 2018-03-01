@@ -3,6 +3,7 @@ from __future__ import print_function
 from tkinter import *
 from PIL import Image, ImageTk
 import cv2
+from DetectSign import *
 
 
 class FinalGUI:
@@ -49,27 +50,39 @@ class FinalGUI:
 
         self.detectedLimitPane = Label(self.root)
         self.detectedLimitPane.grid(row=4, column=3, padx=10, pady=10)
-        self.show_detected_limit()
 
+        self.show_images()
+
+    def show_images(self):
         self.show_frame()
 
     def show_frame(self):
         _, frame = self.vs.read()
+        rect = DetectSign(frame)
+        frame = rect.findRectangle()
+        sign = rect.cropFrame
+
         frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
         frame = cv2.resize(frame, (int(self.w*7/10), int(self.h*7/10)))
         img = Image.fromarray(frame)
         imgtk = ImageTk.PhotoImage(img)
         self.videoPanel.imgtk = imgtk
         self.videoPanel.configure(image=imgtk)
+
+        if sign is not None and sign.size > 0:
+            sign = cv2.resize(sign, (int(self.w * 2 / 10), int(self.h * 4 / 10)))
+            self.show_detected_limit(sign)
+            self.detectedLimitPane.after(10, self.show_detected_limit(sign))
         self.videoPanel.after(10, self.show_frame)
 
-    def show_detected_limit(self):
-        img = cv2.imread("speed_limit_75.png")
-        img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
-        img = Image.fromarray(img)
-        img = ImageTk.PhotoImage(img)
-        self.detectedLimitPane.img = img
-        self.detectedLimitPane.configure(image=img)
+    def show_detected_limit(self, img):
+        # img = cv2.imread("speed_limit_75.png")
+        if img is not None:
+            img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+            img = Image.fromarray(img)
+            img = ImageTk.PhotoImage(img)
+            self.detectedLimitPane.img = img
+            self.detectedLimitPane.configure(image=img)
 
 
 
