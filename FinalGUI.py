@@ -3,13 +3,12 @@ from __future__ import print_function
 from tkinter import *
 from PIL import Image, ImageTk
 import cv2
-from DetectSign import *
-from DetectSpeedLimit import *
+# from images.DetectSpeedLimit import *
+from SignDetection import DetectSign as DS, DetectSpeedLimit as DSL
 
 
 class FinalGUI:
     def __init__(self, root):
-        self.DSL = DetectSpeedLimit(1)
         self.root = root
         # self.vs1 = cv2.VideoCapture(1)
         self.vs = cv2.VideoCapture(0)
@@ -53,32 +52,30 @@ class FinalGUI:
         self.detectedLimitPane = Label(self.root)
         self.detectedLimitPane.grid(row=4, column=3, padx=10, pady=10)
 
-        self.show_images()
-
-    def show_images(self):
         self.show_frame()
 
     def show_frame(self):
         _, frame = self.vs.read()
-        rect = DetectSign(frame)
-
-        frame = rect.findRectangle()
-        sign = rect.cropFrame
-
+        ds = DS(frame)
+        rect = ds.findRectangle()
+        sign = ds.croppedFrame
         frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
         frame = cv2.resize(frame, (int(self.w*7/10), int(self.h*7/10)))
         img = Image.fromarray(frame)
         imgtk = ImageTk.PhotoImage(img)
         self.videoPanel.imgtk = imgtk
         self.videoPanel.configure(image=imgtk)
-
-        if sign is not None and sign.size > 0:
-            sign = cv2.resize(sign, (int(self.w * 2 / 10), int(self.h * 4 / 10)))
-            sign = self.DSL.readFromFrame(sign, sign)
-            self.carSpeedLimitLabel.config(text=self.DSL.readSpeedLimit)
-            self.show_detected_limit(sign)
-            self.detectedLimitPane.after(10, self.show_detected_limit(sign))
-        self.videoPanel.after(10, self.show_frame)
+        if self.vs.isOpened():
+            if sign is not None and sign.size > 0:
+                sign = cv2.resize(sign, (int(self.w * 2 / 10), int(self.h * 4 / 10)))
+                dsl = DSL(sign)
+                sign = dsl.readFromFrame(sign, sign)
+                self.carSpeedLimitLabel.config(text=dsl.readSpeedLimit)
+                self.show_detected_limit(sign)
+                self.detectedLimitPane.after(10, self.show_detected_limit(sign))
+            self.videoPanel.after(10, self.show_frame)
+        else:
+            return
 
     def show_detected_limit(self, img):
         # img = cv2.imread("speed_limit_75.png")
@@ -89,6 +86,10 @@ class FinalGUI:
             img = ImageTk.PhotoImage(img)
             self.detectedLimitPane.img = img
             self.detectedLimitPane.configure(image=img)
+
+    def __del__(self):
+        self.vs.release()
+        cv2.destroyAllWindows()
 
 
 
