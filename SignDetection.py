@@ -5,7 +5,6 @@ import math
 import os
 
 KNearest = cv2.ml.KNearest_create()
-
 # constants for checkIfPossibleChar, this checks one possible char only (does not compare to another char)
 MIN_PIXEL_WIDTH = 2
 MIN_PIXEL_HEIGHT = 8
@@ -41,6 +40,13 @@ ADAPTIVE_THRESH_WEIGHT = 2
 SIGN_WIDTH_PADDING_FACTOR = 1.3
 SIGN_HEIGHT_PADDING_FACTOR = 1.5
 
+SCALAR_BLACK = (0.0, 0.0, 0.0)
+SCALER_WHITE = (255.0, 255.0, 255.0)
+SCALAR_YELLOW = (0.0, 255.0, 255.0)
+SCALAR_GREEN = (0.0, 255.0, 0.0)
+SCALAR_RED = (0.0, 0.0, 255.0)
+
+
 class DetectSign:
     def __init__(self, frame):
         self.frame = frame
@@ -54,7 +60,7 @@ class DetectSign:
         gray = maximizeContrast(gray)
         gray = cv2.GaussianBlur(gray, (3, 3), 0)
         gray = cv2.bilateralFilter(gray, 11, 17, 17)
-        self.edged = cv2.Canny(gray, 40, 200)
+        self.edged = cv2.Canny(gray, 40, 100)
 
     def findRectangle(self):
         self.processFrame()
@@ -68,7 +74,7 @@ class DetectSign:
                 # approximate the contour
                 peri = cv2.arcLength(c, True)
                 approx = cv2.approxPolyDP(c, 0.02 * peri, True)
-                mask = np.zeros((self.frame.shape[0], self.frame.shape[1]))
+                # mask = np.zeros((self.frame.shape[0], self.frame.shape[1]))
                 # out = np.zeros_like(self.frame)
                 # if our approximated contour has four points, then
                 # we can assume that we have found our screen
@@ -77,23 +83,19 @@ class DetectSign:
                     p1 = screenCnt[0][0]
                     p2 = screenCnt[1][0]
                     p3 = screenCnt[2][0]
-                    # p4 = screenCnt[3][0]
+                    p4 = screenCnt[3][0]
+                    if abs((p2[0] - p1[0])) == abs((p3[0] - p4[0])):
+                        if 600 / 750 - 0.2 < abs((p2[0] - p1[0]) / (p3[1] - p1[1] + 0.001)) < 600 / 750 + 0.2:
+                            # print((p2[0] - p1[0])/(p3[1] - p1[1]))
+                            # cv2.fillConvexPoly(mask, screenCnt, 1)
+                            cv2.drawContours(self.frame, [screenCnt], -1, SCALAR_GREEN, 1)
+                            self.croppedFrame = self.frame[p1[1]:p3[1], p1[0]:p2[0]]
 
-                    if 600 / 750 - 0.2 < abs((p2[0] - p1[0]) / (p3[1] - p1[1] + 0.001)) < 600 / 750 + 0.2:
-                        # print((p2[0] - p1[0])/(p3[1] - p1[1]))
-                        cv2.drawContours(self.frame, [screenCnt], -1, (0, 255, 0), 1)
-                        cv2.fillConvexPoly(mask, screenCnt, 1)
-                        self.croppedFrame = self.frame[p1[1]:p3[1], p1[0]:p2[0]]
         return self.frame
 
 
 class DetectSpeedLimit:
     def __init__(self, sign):
-        self.SCALAR_BLACK = (0.0, 0.0, 0.0)
-        self.SCALER_WHITE = (255.0, 255.0, 255.0)
-        self.SCALAR_YELLOW = (0.0, 255.0, 255.0)
-        self.SCALAR_GREEN = (0.0, 255.0, 0.0)
-        self.SCALAR_RED = (0.0, 0.0, 255.0)
         self.readSpeedLimit = None
 
         self.sign = sign
@@ -107,10 +109,10 @@ class DetectSpeedLimit:
 
     def drawRedRectangleAroundSign(self, originalFrame, sign):
         p2fRectPoints = cv2.boxPoints(sign.rrLocationOfSignInFrame)
-        cv2.line(originalFrame, tuple(p2fRectPoints[0]), tuple(p2fRectPoints[1]), self.SCALAR_RED, 2)
-        cv2.line(originalFrame, tuple(p2fRectPoints[1]), tuple(p2fRectPoints[2]), self.SCALAR_RED, 2)
-        cv2.line(originalFrame, tuple(p2fRectPoints[2]), tuple(p2fRectPoints[3]), self.SCALAR_RED, 2)
-        cv2.line(originalFrame, tuple(p2fRectPoints[3]), tuple(p2fRectPoints[0]), self.SCALAR_RED, 2)
+        cv2.line(originalFrame, tuple(p2fRectPoints[0]), tuple(p2fRectPoints[1]), SCALAR_RED, 2)
+        cv2.line(originalFrame, tuple(p2fRectPoints[1]), tuple(p2fRectPoints[2]), SCALAR_RED, 2)
+        cv2.line(originalFrame, tuple(p2fRectPoints[2]), tuple(p2fRectPoints[3]), SCALAR_RED, 2)
+        cv2.line(originalFrame, tuple(p2fRectPoints[3]), tuple(p2fRectPoints[0]), SCALAR_RED, 2)
         return originalFrame
 
     def readFromFrame(self, sign, frame):
@@ -133,9 +135,10 @@ class DetectSpeedLimit:
 
             frame = self.drawRedRectangleAroundSign(frame, spdSign)
             speedLimit = int(5 * round(float(int(spdSign.strChar)) / 5))
-            self.readSpeedLimit = str(speedLimit)
-            print("\nSpeed Limit Read From Image: {0}\n".format(spdSign.strChar))
-            print("------------------------------------")
+            if speedLimit <= 100:
+                self.readSpeedLimit = str(speedLimit)
+                print("\nSpeed Limit Read From Image: {0}\n".format(spdSign.strChar))
+                print("------------------------------------")
 
             return frame
 
@@ -192,13 +195,13 @@ def maximizeContrast(imgGray):
 # Loading in training classifications and training data
 def loadKNNDataAndTrainKNN():
     try:
-        npaClassifications = np.loadtxt("classifications1.txt", np.float32)
+        npaClassifications = np.loadtxt("classification_files/classifications1.txt", np.float32)
     except:
         print("Error, unable to open classifications.txt, exiting program\n")
         return False
 
     try:
-        npaFlattenedImages = np.loadtxt("flattened_images1.txt", np.float32)
+        npaFlattenedImages = np.loadtxt("classification_files/flattened_images1.txt", np.float32)
     except:
         print("Error, unable to open flattened_images.txt, exiting program\n")
         os.system("pause")
@@ -254,10 +257,10 @@ def detectCharsInSign(listOfPossibleSigns):
 
 def findPossibleCharsInSign(imgThresh):
     listOfPossibleChars = []
-    imgThreshCopy = imgThresh.copy()
+    # imgThreshCopy = imgThresh.copy()
 
     # find all contours in plate
-    imgContours, contours, npaHierarchy = cv2.findContours(imgThreshCopy, cv2.RETR_LIST, cv2.CHAIN_APPROX_SIMPLE)
+    imgContours, contours, npaHierarchy = cv2.findContours(imgThresh, cv2.RETR_LIST, cv2.CHAIN_APPROX_SIMPLE)
 
     for contour in contours:  # for each contour
         possibleChar = PossibleChar(contour)

@@ -6,12 +6,14 @@ import cv2
 # from images.DetectSpeedLimit import *
 from SignDetection import DetectSign as DS, DetectSpeedLimit as DSL
 
+videoSource = 'test_videos/test2.m4v'
+
 
 class FinalGUI:
     def __init__(self, root):
         self.root = root
-        # self.vs1 = cv2.VideoCapture(1)
-        self.vs = cv2.VideoCapture(0)
+        self.vs = cv2.VideoCapture(videoSource)
+        # self.vs = cv2.VideoCapture('test_videos/test2.m4v')
         self.w, self.h = self.root.winfo_screenwidth(), self.root.winfo_screenheight()
         self.root.overrideredirect(1)
         self.root.geometry("%dx%d+0+0" % (self.w, self.h))
@@ -57,7 +59,7 @@ class FinalGUI:
     def show_frame(self):
         _, frame = self.vs.read()
         ds = DS(frame)
-        rect = ds.findRectangle()
+        frame = ds.findRectangle()
         sign = ds.croppedFrame
         frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
         frame = cv2.resize(frame, (int(self.w*7/10), int(self.h*7/10)))
@@ -80,8 +82,7 @@ class FinalGUI:
     def show_detected_limit(self, img):
         # img = cv2.imread("speed_limit_75.png")
         if img is not None:
-
-            img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+            img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
             img = Image.fromarray(img)
             img = ImageTk.PhotoImage(img)
             self.detectedLimitPane.img = img
