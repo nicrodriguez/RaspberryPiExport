@@ -6,7 +6,7 @@ import cv2
 # from images.DetectSpeedLimit import *
 from SignDetection import DetectSign as DS, DetectSpeedLimit as DSL
 
-videoSource = 'test_videos/test2.m4v'
+videoSource = 0
 
 
 class FinalGUI:
@@ -82,7 +82,8 @@ class FinalGUI:
     def show_detected_limit(self, img):
         # img = cv2.imread("speed_limit_75.png")
         if img is not None:
-            img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+
+            img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
             img = Image.fromarray(img)
             img = ImageTk.PhotoImage(img)
             self.detectedLimitPane.img = img

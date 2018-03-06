@@ -47,6 +47,30 @@ SCALAR_GREEN = (0.0, 255.0, 0.0)
 SCALAR_RED = (0.0, 0.0, 255.0)
 
 
+# Loading in training classifications and training data at start to increase runtime speed
+def loadKNNDataAndTrainKNN():
+    try:
+        npaClassifications = np.loadtxt("classification_files/classifications.txt", np.float32)
+    except:
+        print("Error, unable to open classifications.txt, exiting program\n")
+        return False
+
+    try:
+        npaFlattenedImages = np.loadtxt("classification_files/flattened_images.txt", np.float32)
+    except:
+        print("Error, unable to open flattened_images.txt, exiting program\n")
+        os.system("pause")
+        return False
+
+    npaClassifications = npaClassifications.reshape((npaClassifications.size, 1))
+    KNearest.setDefaultK(1)
+    KNearest.train(npaFlattenedImages, cv2.ml.ROW_SAMPLE, npaClassifications)
+    return True
+
+
+blnkKNNTrainingSuccessful = loadKNNDataAndTrainKNN()
+
+
 class DetectSign:
     def __init__(self, frame):
         self.frame = frame
@@ -100,8 +124,6 @@ class DetectSpeedLimit:
 
         self.sign = sign
 
-        blnkKNNTrainingSuccessful = loadKNNDataAndTrainKNN()
-
         if not blnkKNNTrainingSuccessful:
             print("\nError: KNN training was not successful\n")
             return
@@ -134,8 +156,9 @@ class DetectSpeedLimit:
                 return frame
 
             frame = self.drawRedRectangleAroundSign(frame, spdSign)
-            speedLimit = int(5 * round(float(int(spdSign.strChar)) / 5))
-            if speedLimit <= 100:
+
+            speedLimit = int(spdSign.strChar)  # int(5 * round(float() / 5))
+            if speedLimit <= 100 and speedLimit % 5 == 0:
                 self.readSpeedLimit = str(speedLimit)
                 print("\nSpeed Limit Read From Image: {0}\n".format(spdSign.strChar))
                 print("------------------------------------")
@@ -192,25 +215,6 @@ def maximizeContrast(imgGray):
     return imgGrayscalePlusTopHatMinusBlackHat
 
 
-# Loading in training classifications and training data
-def loadKNNDataAndTrainKNN():
-    try:
-        npaClassifications = np.loadtxt("classification_files/classifications1.txt", np.float32)
-    except:
-        print("Error, unable to open classifications.txt, exiting program\n")
-        return False
-
-    try:
-        npaFlattenedImages = np.loadtxt("classification_files/flattened_images1.txt", np.float32)
-    except:
-        print("Error, unable to open flattened_images.txt, exiting program\n")
-        os.system("pause")
-        return False
-
-    npaClassifications = npaClassifications.reshape((npaClassifications.size, 1))
-    KNearest.setDefaultK(1)
-    KNearest.train(npaFlattenedImages, cv2.ml.ROW_SAMPLE, npaClassifications)
-    return True
 
 
 def detectCharsInSign(listOfPossibleSigns):
