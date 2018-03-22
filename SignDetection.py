@@ -77,14 +77,24 @@ class DetectSign:
         self.croppedFrame = None
         self.edged = None
 
+    def colorFilter(self, frame, lowerLimit, upperLimit):
+        newframe = cv2.cvtColor(frame.copy(), cv2.COLOR_BGR2HSV)
+        mask = cv2.inRange(newframe, lowerLimit, upperLimit)
+        return cv2.bitwise_and(newframe, newframe, mask=mask)
+
     def processFrame(self):
         self.frame = imutils.resize(self.frame, height=300)
+
+        lowerLimit = np.array([0, 0, 0])
+        uppperLimit = np.array([179, 255, 255])
+        newframe = self.colorFilter(self.frame, lowerLimit, uppperLimit)
+        cv2.imshow('Filtered', newframe)
         # convert the image to grayscale, blur it, and find edges
-        gray = cv2.cvtColor(self.frame, cv2.COLOR_BGR2GRAY)
+        gray = cv2.cvtColor(newframe, cv2.COLOR_BGR2GRAY)
         gray = maximizeContrast(gray)
         gray = cv2.GaussianBlur(gray, (3, 3), 0)
         gray = cv2.bilateralFilter(gray, 11, 17, 17)
-        self.edged = cv2.Canny(gray, 40, 100)
+        self.edged = cv2.Canny(gray, 200, 300)
 
     def findRectangle(self):
         self.processFrame()
@@ -213,8 +223,6 @@ def maximizeContrast(imgGray):
     imgGrayscalePlusTopHatMinusBlackHat = cv2.subtract(imgGrayscalePlusTopHat, imgBlackHat)
 
     return imgGrayscalePlusTopHatMinusBlackHat
-
-
 
 
 def detectCharsInSign(listOfPossibleSigns):

@@ -6,7 +6,7 @@ import cv2
 # from images.DetectSpeedLimit import *
 from SignDetection import DetectSign as DS, DetectSpeedLimit as DSL
 
-videoSource = 0
+videoSource = 'test_videos/test3.m4v'
 
 
 class FinalGUI:
@@ -62,7 +62,14 @@ class FinalGUI:
         frame = ds.findRectangle()
         sign = ds.croppedFrame
         frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+
+        # gray = cv2.cvtColor(self.frame, cv2.COLOR_BGR2GRAY)
+        # gray = maximizeContrast(frame)
+        # gray = cv2.GaussianBlur(gray, (3, 3), 0)
+        # gray = cv2.bilateralFilter(gray, 11, 17, 17)
+        # frame = cv2.Canny(gray, 200, 300)
         frame = cv2.resize(frame, (int(self.w*7/10), int(self.h*7/10)))
+
         img = Image.fromarray(frame)
         imgtk = ImageTk.PhotoImage(img)
         self.videoPanel.imgtk = imgtk
@@ -96,3 +103,14 @@ class FinalGUI:
 
 
 
+def maximizeContrast(imgGray):
+    # height, width = imgGray.shape
+    structuringElement = cv2.getStructuringElement(cv2.MORPH_RECT, (3, 3))
+
+    imgTopHat = cv2.morphologyEx(imgGray, cv2.MORPH_TOPHAT, structuringElement)
+    imgBlackHat = cv2.morphologyEx(imgGray, cv2.MORPH_BLACKHAT, structuringElement)
+
+    imgGrayscalePlusTopHat = cv2.add(imgGray, imgTopHat)
+    imgGrayscalePlusTopHatMinusBlackHat = cv2.subtract(imgGrayscalePlusTopHat, imgBlackHat)
+
+    return imgGrayscalePlusTopHatMinusBlackHat
